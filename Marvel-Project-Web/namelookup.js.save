@@ -1,0 +1,55 @@
+// JavaScript for Name Data Lookup Demo
+// Jim Skon, Kenyon College, 2019
+var searchType;  // Save serach type here
+
+$(document).ready(function () {
+    console.log("start!");
+    searchType="Name";
+    $("#search-btn").click(getMatches);
+
+    $("#clear").click(clearResults);
+
+    $(".dropdown-menu a").click(function(){
+	console.log("pick!"+$(this).text());
+	$(this).parents(".dropdown").find(".selection").text($(this).text());
+	searchType=$(this).text();
+    });
+});
+
+// Build output table from comma delimited list
+function nameTable(list) {
+    var result = '<table class="w3-table-all w3-hoverable" border="2"><tr><th>Number</th><th>Name</th><th>Link to Character Page</th><tr>';
+    var a = list.split(",");
+    var aLen = a.length;
+    for (var i = 0; i < aLen; i+=3) {
+	result += "<tr><td>"+a[i]+"</td><td>"+'<div class="charname"data="' + i + '">' a[i+1]+"</div>" + "</td><td>"+ "<a href =" +a[i+2]+ ">Link</a>"+"</td></tr>";
+    }
+    result += "</table>";
+
+    return result;
+}
+
+function processResults(results) {
+    $('#searchresults').empty();
+    $('#searchresults').append(nameTable(results));
+}
+
+function clearResults() {
+    $('#searchresults').empty();
+}
+
+function getMatches(){
+    console.log("getMatches!");
+    var searchStr=$('#search').val();
+    console.log(searchStr+":"+searchType);
+    if (searchStr.length < 2) return;
+    $('#searchresults').empty();
+    $.ajax({
+	url: '/cgi-bin/clark1_marvelSearch.cgi?name='+searchStr+'&type_select='+searchType,
+	type: "get",
+	dataType: 'text',
+	success: processResults,
+	error: function(){alert("Error: Something went wrong");}
+    });
+
+}
